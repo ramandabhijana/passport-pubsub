@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Authenticate</title>
+</head>
+<body>
+
+<button id="clickMeBtn">Click me!</button>
+
+<script>
+document.getElementById("clickMeBtn").addEventListener("click", function() {
+  const token = 'abc'
+
+  const eventSource = new EventSource('http://localhost:8080/auth-response-events/' + token)
+
+  // Event listener for receiving SSE messages
+  eventSource.onmessage = function(event) {
+    // You can handle the received data here as needed
+    const data = JSON.parse(event.data)
+    console.log('Received message:', data);
+
+    // close after data is received
+    eventSource.close()
+  };
+
+  // Event listener for handling SSE errors
+  eventSource.onerror = function(error) {
+    console.error('Error occurred in SSE connection:', error);
+    // You can handle the error here as needed
+  };
+
+  // Event listener for closing the SSE connection when the button is clicked again
+  this.addEventListener('click', function() {
+    eventSource.close();
+    console.log('SSE connection closed');
+  }, { once: true });
+
+  window.open('http://localhost:8080/oauth/google/' + token, 'google_login', 'width=500,height=500')
+});
+</script>
+
+</body>
+</html>
